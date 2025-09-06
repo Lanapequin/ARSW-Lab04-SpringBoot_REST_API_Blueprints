@@ -1,37 +1,52 @@
-# Escuela Colombiana de Ingeniería
-# Arquitecturas de Software - ARSW
-### Taller – Principio de Inversión de dependencias, Contenedores Livianos e Inyección de dependencias.
+# Inversión de Dependencias, Contenedores Livianos e Inyección con Spring Framework
 
-Parte I. Ejercicio básico.
+## Integrantes
+- Laura Natalia Perilla Quintero - [Lanapequin](https://github.com/Lanapequin)
+- Santiago Botero Garcia - [LePeanutButter](https://github.com/LePeanutButter)
 
-Para ilustrar el uso del framework Spring, y el ambiente de desarrollo para el uso del mismo a través de Maven (y NetBeans), se hará la configuración de una aplicación de análisis de textos, que hace uso de un verificador gramatical que requiere de un corrector ortográfico. A dicho verificador gramatical se le inyectará, en tiempo de ejecución, el corrector ortográfico que se requiera (por ahora, hay dos disponibles: inglés y español).
+## Taller – Principio de Inversión de dependencias, Contenedores Livianos e Inyección de dependencias.
 
-1. Abra el los fuentes del proyecto en NetBeans.
+Antes de abordar el desarrollo del ejercicio Parte I. - Diseño de Componentes y Conectores con Inyección de Dependencias en Spring, se realizó este taller introductorio con el objetivo de familiarizarse con los conceptos fundamentales del uso de Spring Framework como contenedor liviano, la inyección de dependencias y la aplicación del principio de inversión de dependencias.
 
-2. Revise el archivo de configuración de Spring ya incluido en el proyecto (src/main/resources). El mismo indica que Spring buscará automáticamente los 'Beans' disponibles en el paquete indicado.
+Este taller documenta la configuración y prueba de una aplicación Java basada en Spring Framework, que realiza análisis gramatical utilizando correctores ortográficos inyectados dinámicamente. Se utilizó Maven como gestor de dependencias y el entorno IntelliJ IDEA para el desarrollo.
 
-3. Haciendo uso de la [configuración de Spring basada en anotaciones](https://docs.spring.io/spring-boot/docs/current/reference/html/using-boot-spring-beans-and-dependency-injection.html) marque con las anotaciones @Autowired y @Service las dependencias que deben inyectarse, y los 'beans' candidatos a ser inyectadas -respectivamente-:
+El archivo applicationContext.xml ubicado en `src/main/resources` define el contexto de Spring. Se habilita el escaneo automático de componentes con la siguiente configuración:
 
-	* GrammarChecker será un bean, que tiene como dependencia algo de tipo 'SpellChecker'.
-	* EnglishSpellChecker y SpanishSpellChecker son los dos posibles candidatos a ser inyectados. Se debe seleccionar uno, u otro, mas NO ambos (habría conflicto de resolución de dependencias). Por ahora haga que se use EnglishSpellChecker.
- 
-5.	Haga un programa de prueba, donde se cree una instancia de GrammarChecker mediante Spring, y se haga uso de la misma:
+![bean-resources.png](img/bean-resources.png)
 
-	```java
-	public static void main(String[] args) {
-		ApplicationContext ac=new ClassPathXmlApplicationContext("applicationContext.xml");
-		GrammarChecker gc=ac.getBean(GrammarChecker.class);
-		System.out.println(gc.check("la la la "));
-	}
-	```
-	
-6.	Modifique la configuración con anotaciones para que el Bean ‘GrammarChecker‘ ahora haga uso del  la clase SpanishSpellChecker (para que a GrammarChecker se le inyecte EnglishSpellChecker en lugar de  SpanishSpellChecker. Verifique el nuevo resultado.
+Esto permite que Spring detecte clases anotadas con `@Service`, `@Component`, etc., dentro del paquete especificado. Así se evita la necesidad de declarar manualmente cada bean.
 
-## Escuela Colombiana de Ingeniería
+La clase principal contiene el método main que inicializa el contexto de Spring y obtiene el bean GrammarChecker para ejecutar la verificación gramatical:
 
-## Arquitecturas de Software
+![main-spring-lightweight.png](img/main-spring-lightweight.png)
 
-# Componentes y conectores - Parte I.
+Este fragmento demuestra cómo Spring gestiona la creación e inyección de dependencias automáticamente.
+
+La clase GrammarChecker es el componente central que depende de una implementación de SpellChecker. Se anota con `@Service` para que Spring la registre como bean, y se usa `@Autowired` junto con `@Qualifier` para inyectar la implementación deseada:
+
+![grammar-checker-as-service.png](img/grammar-checker-as-service.png)
+
+sta clase implementa la interfaz SpellChecker y se anota con `@Service("englishSpellChecker")` para que Spring la identifique con ese nombre:
+
+![english-as-service.png](img/english-as-service.png)
+
+Esta implementación se inyecta inicialmente en GrammarChecker.
+
+Similar a la versión en inglés, esta clase implementa SpellChecker y se registra como bean con nombre específico:
+
+![spanish-as-service.png](img/spanish-as-service.png)
+
+Para usar esta implementación, se debe cambiar el `@Qualifier` en GrammarChecker a "spanishSpellChecker".
+
+La prueba inicial utiliza EnglishSpellChecker como dependencia inyectada. El resultado muestra cómo se analiza el texto usando reglas del idioma inglés.
+
+![english-test.png](img/english-test.png)
+
+Tras modificar el `@Qualifier` en GrammarChecker, se inyecta SpanishSpellChecker. El resultado refleja el análisis gramatical bajo reglas del idioma español.
+
+![spanish-test.png](img/spanish-test.png)
+
+## Parte I. - Diseño de Componentes y Conectores con Inyección de Dependencias en Spring
 
 El ejercicio se debe traer terminado para el siguiente laboratorio (Parte II).
 

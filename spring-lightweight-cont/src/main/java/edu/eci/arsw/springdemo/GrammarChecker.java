@@ -6,34 +6,20 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class GrammarChecker {
-
-	@Autowired
-	@Qualifier("englishSpellChecker")
-	SpellChecker sc;
-
+	private final SpellChecker sc;
 	String x;
-        
+
+    @Autowired
+    public GrammarChecker(@Qualifier("englishSpellChecker") SpellChecker sc) {
+        this.sc = sc;
+    }
         
 	public SpellChecker getSpellChecker() {
 		return sc;
 	}
 
-	public void setSpellChecker(SpellChecker sc) {
-		this.sc = sc;
-	}
-
-
 	public String check(String text){
-		
-		StringBuffer sb=new StringBuffer();
-		sb.append("Spell checking output:"+sc.checkSpell(text));
-		sb.append("Plagiarism checking output: Not available yet");
-		
-		
-		return sb.toString();
-		
+        return "Spell checking output:" + sc.checkSpell(text) +
+                "Plagiarism checking output: Not available yet";
 	}
-
-
-	
 }
