@@ -9,16 +9,20 @@ import edu.eci.arsw.springdemo.GrammarChecker;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import java.util.logging.Logger;
+
 /**
  *
  * @author hcadavid
+ * @author LePeanutButter
+ * @author Lanapequin
  */
 public class Main {
+    static Logger logger = Logger.getLogger(Main.class.getName());
 
-    public static void main(String a[]) {
+    public static void main(String[] a) {
         ApplicationContext ac = new ClassPathXmlApplicationContext("applicationContext.xml");
         GrammarChecker gc = ac.getBean(GrammarChecker.class);
-        System.out.println(gc.check("la la la "));
+        logger.info(() -> gc.check("la la la "));
     }
-
 }
