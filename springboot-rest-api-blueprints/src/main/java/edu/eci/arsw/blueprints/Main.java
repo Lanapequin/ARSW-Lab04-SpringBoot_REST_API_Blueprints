@@ -4,13 +4,21 @@ import edu.eci.arsw.blueprints.config.AppConfig;
 import edu.eci.arsw.blueprints.model.*;
 import edu.eci.arsw.blueprints.services.BlueprintsServices;
 import edu.eci.arsw.blueprints.persistence.BlueprintNotFoundException;
-import edu.eci.arsw.blueprints.persistence.BlueprintPersistenceException;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import java.util.Set;
 
+/**
+ * @author LePeanutButter
+ * @author Lanapequin
+ */
+
 public class Main {
+    static Logger logger = Logger.getLogger(Main.class.getName());
     public static void main(String[] args) {
         ApplicationContext ctx = new AnnotationConfigApplicationContext(AppConfig.class);
         BlueprintsServices services = ctx.getBean(BlueprintsServices.class);
@@ -24,25 +32,24 @@ public class Main {
             services.addNewBlueprint(bp2);
             services.addNewBlueprint(bp3);
 
-            System.out.println("Blueprint Alice, PlanA: " + services.getBlueprint("Alice", "PlanA"));
+            logger.log(Level.INFO, "Blueprint Alice, PlanA: {0}", services.getBlueprint("Alice", "PlanA"));
 
             Set<Blueprint> aliceBlueprints = services.getBlueprintsByAuthor("Alice");
-            System.out.println("Blueprints by Alice:");
-            aliceBlueprints.forEach(System.out::println);
+            logger.info("Blueprints by Alice:");
+            aliceBlueprints.forEach(bp -> logger.info(bp.toString()));
 
             Set<Blueprint> allBlueprints = services.getAllBlueprints();
-            System.out.println("All blueprints in the system:");
-            allBlueprints.forEach(System.out::println);
+            logger.info("All blueprints in the system:");
+            allBlueprints.forEach(bp -> logger.info(bp.toString()));
 
-            System.out.println("Eliminando el blueprint PlanB de Alice...");
             services.deleteBlueprint("Alice", "PlanB");
 
-            System.out.println("Blueprints by Alice después de eliminar PlanB:");
+            logger.info("Blueprints by Alice after deleting PlanB:");
             aliceBlueprints = services.getBlueprintsByAuthor("Alice");
-            aliceBlueprints.forEach(System.out::println);
+            aliceBlueprints.forEach(bp -> logger.info(bp.toString()));
 
         } catch (BlueprintNotFoundException e) {
-            System.err.println("Blueprint no encontrado: " + e.getMessage());
+            logger.log(Level.WARNING, "Blueprint not found", e);
         }
     }
 }

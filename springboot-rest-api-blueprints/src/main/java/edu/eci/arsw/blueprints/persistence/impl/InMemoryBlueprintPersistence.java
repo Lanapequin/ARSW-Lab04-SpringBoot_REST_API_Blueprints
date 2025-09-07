@@ -20,6 +20,8 @@ import java.util.Set;
 /**
  *
  * @author hcadavid
+ * @author LePeanutButter
+ * @author Lanapequin
  */
 
 @Repository

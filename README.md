@@ -46,17 +46,38 @@ En este ejercicio se va a construír un modelo de clases para la capa lógica de
 
 1. Configure la aplicación para que funcione bajo un esquema de inyección de dependencias, tal como se muestra en el diagrama anterior.
 
+	Se implementaron las respectivas anotaciones que hacian falta para poder usar Spring correctamente.
 
-    Lo anterior requiere:
+	![anotacion.png](springboot-rest-api-blueprints/img/anotacion.png)
 
-    * Agregar las dependencias de Spring.
-    * Agregar la configuración de Spring.
-    * Configurar la aplicación -mediante anotaciones- para que el esquema de persistencia sea inyectado al momento de ser creado el bean 'BlueprintServices'.
+	Se implemento la clase AppConfig con el fin de que Spring detecte automaticamente las clases que contienen anotaciones.
+	
+	![appConfig.png](springboot-rest-api-blueprints/img/appConfig.png)
 
+	Para la inyeccion de dependencias se uso @Autowired en la clase BlueprintsServices, donde InMemoryBlueprintPersistence es inyectado en BlueprintsServices al ejecutar
+	
+	![anotacion1.png](springboot-rest-api-blueprints/img/anotacion1.png)
 
 2. Complete los operaciones getBluePrint() y getBlueprintsByAuthor(). Implemente todo lo requerido de las capas inferiores (por ahora, el esquema de persistencia disponible 'InMemoryBlueprintPersistence') agregando las pruebas correspondientes en 'InMemoryPersistenceTest'.
 
+	En BlueprintsServices se delegaron las operaciones a bpp y en InMemoryBlueprintPersistence se implemento la lógica usando un HashMap<Tuple<String,String>,Blueprint>.
+	
+	![persistencia.png](springboot-rest-api-blueprints/img/persistencia.png)
+	
+	Posteriormente, se realizaron las pruebas unitarias de InMemoryBlueprintPersistence, la cuales se ejecutaron perfectamente.
+	
+	![testPersisitencia.png](springboot-rest-api-blueprints/img/testPersisitencia.png)
+
 3. Haga un programa en el que cree (mediante Spring) una instancia de BlueprintServices, y rectifique la funcionalidad del mismo: registrar planos, consultar planos, registrar planos específicos, etc.
+
+	Se crearon los respectivos métodos en InMemoryBlueprintPersistence de registrar, consultar y eliminar planos, estos métodos son llamados desde las clases superiores.
+	
+	![service.png](springboot-rest-api-blueprints/img/service.png)
+	
+	Con la implementacion de la clase Main, se puso en uso estos métodos para comprobar su funcionamiento.
+	
+	![main.png](springboot-rest-api-blueprints/img/main.png)
+	![mainPrueba.png](springboot-rest-api-blueprints/img/mainPrueba.png)
 
 4. Se quiere que las operaciones de consulta de planos realicen un proceso de filtrado, antes de retornar los planos consultados. Dichos filtros lo que buscan es reducir el tamaño de los planos, removiendo datos redundantes o simplemente submuestrando, antes de retornarlos. Ajuste la aplicación (agregando las abstracciones e implementaciones que considere) para que a la clase BlueprintServices se le inyecte uno de dos posibles 'filtros' (o eventuales futuros filtros). No se contempla el uso de más de uno a la vez:
     * (A) Filtrado de redundancias: suprime del plano los puntos consecutivos que sean repetidos.
