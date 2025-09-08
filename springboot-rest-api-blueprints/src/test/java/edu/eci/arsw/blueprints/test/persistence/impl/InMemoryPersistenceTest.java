@@ -10,8 +10,8 @@ import edu.eci.arsw.blueprints.model.Point;
 import edu.eci.arsw.blueprints.persistence.BlueprintNotFoundException;
 import edu.eci.arsw.blueprints.persistence.BlueprintPersistenceException;
 import edu.eci.arsw.blueprints.persistence.impl.InMemoryBlueprintPersistence;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import java.util.Set;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -65,10 +65,61 @@ public class InMemoryPersistenceTest {
         catch (BlueprintPersistenceException ex){
             
         }
-                
-        
     }
 
+    @Test
+    public void testSaveAndLoadBlueprint() throws Exception {
+        InMemoryBlueprintPersistence persistence = new InMemoryBlueprintPersistence();
 
+        Blueprint bp = new Blueprint("Alice", "House", new Point[]{new Point(10, 10), new Point(20, 20)});
+        persistence.saveBlueprint(bp);
+
+        Blueprint loaded = persistence.getBlueprint("Alice", "House");
+        assertNotNull("Blueprint should not be null", loaded);
+        assertEquals("Blueprint should match saved one", bp, loaded);
+    }
+
+    @Test(expected = BlueprintPersistenceException.class)
+    public void testSaveDuplicateBlueprint() throws Exception {
+        InMemoryBlueprintPersistence persistence = new InMemoryBlueprintPersistence();
+
+        Blueprint bp1 = new Blueprint("Bob", "Villa", new Point[]{new Point(1, 1)});
+        Blueprint bp2 = new Blueprint("Bob", "Villa", new Point[]{new Point(2, 2)});
+
+        persistence.saveBlueprint(bp1);
+        persistence.saveBlueprint(bp2); // This should throw
+    }
+
+    @Test
+    public void testGetBlueprintsByAuthor() throws Exception {
+        InMemoryBlueprintPersistence persistence = new InMemoryBlueprintPersistence();
+
+        Blueprint bp1 = new Blueprint("Carol", "Design1", new Point[]{});
+        Blueprint bp2 = new Blueprint("Carol", "Design2", new Point[]{});
+        Blueprint bp3 = new Blueprint("Dave", "Other", new Point[]{});
+
+        persistence.saveBlueprint(bp1);
+        persistence.saveBlueprint(bp2);
+        persistence.saveBlueprint(bp3);
+
+        Set<Blueprint> carolBps = persistence.getBlueprintsByAuthor("Carol");
+
+        assertEquals("Carol should have 2 blueprints", 2, carolBps.size());
+        assertTrue(carolBps.contains(bp1));
+        assertTrue(carolBps.contains(bp2));
+    }
+
+    @Test(expected = BlueprintNotFoundException.class)
+    public void testGetBlueprintsByNonexistentAuthor() throws Exception {
+        InMemoryBlueprintPersistence persistence = new InMemoryBlueprintPersistence();
+        persistence.getBlueprintsByAuthor("Nonexistent"); // Should throw
+    }
+
+    @Test
+    public void testGetBlueprintReturnsNullIfNotFound() throws Exception {
+        InMemoryBlueprintPersistence persistence = new InMemoryBlueprintPersistence();
+        Blueprint bp = persistence.getBlueprint("Ghost", "Phantom");
+        assertNull("Should return null if blueprint doesn't exist", bp);
+    }
     
 }

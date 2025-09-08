@@ -1,65 +1,129 @@
-# Escuela Colombiana de Ingeniería
-# Arquitecturas de Software - ARSW
-### Taller – Principio de Inversión de dependencias, Contenedores Livianos e Inyección de dependencias.
+# Inversión de Dependencias, Contenedores Livianos e Inyección con Spring Framework
 
-Parte I. Ejercicio básico.
+## Integrantes
+- Laura Natalia Perilla Quintero - [Lanapequin](https://github.com/Lanapequin)
+- Santiago Botero Garcia - [LePeanutButter](https://github.com/LePeanutButter)
 
-Para ilustrar el uso del framework Spring, y el ambiente de desarrollo para el uso del mismo a través de Maven (y NetBeans), se hará la configuración de una aplicación de análisis de textos, que hace uso de un verificador gramatical que requiere de un corrector ortográfico. A dicho verificador gramatical se le inyectará, en tiempo de ejecución, el corrector ortográfico que se requiera (por ahora, hay dos disponibles: inglés y español).
+## Taller – Principio de Inversión de dependencias, Contenedores Livianos e Inyección de dependencias.
 
-1. Abra el los fuentes del proyecto en NetBeans.
+Antes de abordar el desarrollo del ejercicio Parte I. - Diseño de Componentes y Conectores con Inyección de Dependencias en Spring, se realizó este taller introductorio con el objetivo de familiarizarse con los conceptos fundamentales del uso de Spring Framework como contenedor liviano, la inyección de dependencias y la aplicación del principio de inversión de dependencias.
 
-2. Revise el archivo de configuración de Spring ya incluido en el proyecto (src/main/resources). El mismo indica que Spring buscará automáticamente los 'Beans' disponibles en el paquete indicado.
+Este taller se encuentra disponible en el folder `spring-lightweight-cont`, donde se puede consultar el código fuente, configuración y pruebas realizadas.
 
-3. Haciendo uso de la [configuración de Spring basada en anotaciones](https://docs.spring.io/spring-boot/docs/current/reference/html/using-boot-spring-beans-and-dependency-injection.html) marque con las anotaciones @Autowired y @Service las dependencias que deben inyectarse, y los 'beans' candidatos a ser inyectadas -respectivamente-:
+Este taller documenta la configuración y prueba de una aplicación Java basada en Spring Framework, que realiza análisis gramatical utilizando correctores ortográficos inyectados dinámicamente. Se utilizó Maven como gestor de dependencias y el entorno IntelliJ IDEA para el desarrollo.
 
-	* GrammarChecker será un bean, que tiene como dependencia algo de tipo 'SpellChecker'.
-	* EnglishSpellChecker y SpanishSpellChecker son los dos posibles candidatos a ser inyectados. Se debe seleccionar uno, u otro, mas NO ambos (habría conflicto de resolución de dependencias). Por ahora haga que se use EnglishSpellChecker.
- 
-5.	Haga un programa de prueba, donde se cree una instancia de GrammarChecker mediante Spring, y se haga uso de la misma:
+El archivo applicationContext.xml ubicado en `src/main/resources` define el contexto de Spring. Se habilita el escaneo automático de componentes con la siguiente configuración:
 
-	```java
-	public static void main(String[] args) {
-		ApplicationContext ac=new ClassPathXmlApplicationContext("applicationContext.xml");
-		GrammarChecker gc=ac.getBean(GrammarChecker.class);
-		System.out.println(gc.check("la la la "));
-	}
-	```
-	
-6.	Modifique la configuración con anotaciones para que el Bean ‘GrammarChecker‘ ahora haga uso del  la clase SpanishSpellChecker (para que a GrammarChecker se le inyecte EnglishSpellChecker en lugar de  SpanishSpellChecker. Verifique el nuevo resultado.
+![bean-resources.png](img/bean-resources.png)
 
-## Escuela Colombiana de Ingeniería
+Esto permite que Spring detecte clases anotadas con `@Service`, `@Component`, etc., dentro del paquete especificado. Así se evita la necesidad de declarar manualmente cada bean.
 
-## Arquitecturas de Software
+La clase principal contiene el método main que inicializa el contexto de Spring y obtiene el bean GrammarChecker para ejecutar la verificación gramatical:
 
-# Componentes y conectores - Parte I.
+![main-spring-lightweight.png](img/main-spring-lightweight.png)
 
-El ejercicio se debe traer terminado para el siguiente laboratorio (Parte II).
+Este fragmento demuestra cómo Spring gestiona la creación e inyección de dependencias automáticamente.
 
-#### Middleware- gestión de planos.
+La clase GrammarChecker es el componente central que depende de una implementación de SpellChecker. Se anota con `@Service` para que Spring la registre como bean, y se usa `@Autowired` junto con `@Qualifier` para inyectar la implementación deseada:
 
+![grammar-checker-as-service.png](img/grammar-checker-as-service.png)
 
-## Antes de hacer este ejercicio, realice [el ejercicio introductorio al manejo de Spring y la configuración basada en anotaciones](https://github.com/ARSW-ECI/Spring_LightweightCont_Annotation-DI_Example).
+sta clase implementa la interfaz SpellChecker y se anota con `@Service("englishSpellChecker")` para que Spring la identifique con ese nombre:
 
-En este ejercicio se va a construír un modelo de clases para la capa lógica de una aplicación que permita gestionar planos arquitectónicos de una prestigiosa compañia de diseño. 
+![english-as-service.png](img/english-as-service.png)
 
-![](img/ClassDiagram1.png)
+Esta implementación se inyecta inicialmente en GrammarChecker.
 
-1. Configure la aplicación para que funcione bajo un esquema de inyección de dependencias, tal como se muestra en el diagrama anterior.
+Similar a la versión en inglés, esta clase implementa SpellChecker y se registra como bean con nombre específico:
 
+![spanish-as-service.png](img/spanish-as-service.png)
 
-    Lo anterior requiere:
+Para usar esta implementación, se debe cambiar el `@Qualifier` en GrammarChecker a "spanishSpellChecker".
 
-    * Agregar las dependencias de Spring.
-    * Agregar la configuración de Spring.
-    * Configurar la aplicación -mediante anotaciones- para que el esquema de persistencia sea inyectado al momento de ser creado el bean 'BlueprintServices'.
+La prueba inicial utiliza EnglishSpellChecker como dependencia inyectada. El resultado muestra cómo se analiza el texto usando reglas del idioma inglés.
 
+![english-test.png](img/english-test.png)
 
-2. Complete los operaciones getBluePrint() y getBlueprintsByAuthor(). Implemente todo lo requerido de las capas inferiores (por ahora, el esquema de persistencia disponible 'InMemoryBlueprintPersistence') agregando las pruebas correspondientes en 'InMemoryPersistenceTest'.
+Tras modificar el `@Qualifier` en GrammarChecker, se inyecta SpanishSpellChecker. El resultado refleja el análisis gramatical bajo reglas del idioma español.
 
-3. Haga un programa en el que cree (mediante Spring) una instancia de BlueprintServices, y rectifique la funcionalidad del mismo: registrar planos, consultar planos, registrar planos específicos, etc.
+![spanish-test.png](img/spanish-test.png)
 
-4. Se quiere que las operaciones de consulta de planos realicen un proceso de filtrado, antes de retornar los planos consultados. Dichos filtros lo que buscan es reducir el tamaño de los planos, removiendo datos redundantes o simplemente submuestrando, antes de retornarlos. Ajuste la aplicación (agregando las abstracciones e implementaciones que considere) para que a la clase BlueprintServices se le inyecte uno de dos posibles 'filtros' (o eventuales futuros filtros). No se contempla el uso de más de uno a la vez:
-    * (A) Filtrado de redundancias: suprime del plano los puntos consecutivos que sean repetidos.
-    * (B) Filtrado de submuestreo: suprime 1 de cada 2 puntos del plano, de manera intercalada.
+## Parte I. - Diseño de Componentes y Conectores con Inyección de Dependencias en Spring
 
-5. Agrege las pruebas correspondientes a cada uno de estos filtros, y pruebe su funcionamiento en el programa de prueba, comprobando que sólo cambiando la posición de las anotaciones -sin cambiar nada más-, el programa retorne los planos filtrados de la manera (A) o de la manera (B). 
+En este ejercicio, se construyó un modelo de clases para la capa lógica de una aplicación destinada a gestionar planos arquitectónicos de una prestigiosa compañía de diseño.
+
+Se implementaron las anotaciones necesarias para integrar correctamente el framework Spring y garantizar su funcionamiento adecuado en el contexto de la gestión de planos.
+
+![](img/anotacion.png)
+
+Con el fin de que Spring detectara automáticamente las clases que contienen anotaciones relevantes para la gestión de planos, se desarrolló la clase AppConfig.
+
+![](img/appConfig.png)
+
+Para permitir la inyección de dependencias en las clases encargadas de la lógica de negocio, se utilizó la anotación @Autowired en la clase BlueprintsServices. De esta forma, InMemoryBlueprintPersistence se inyectó en BlueprintsServices cuando se ejecutó la aplicación.
+
+![](img/anotacion1.png)
+
+En BlueprintsServices, se delegaron las operaciones relacionadas con los planos a bpp (BluePrintPersistence), mientras que en InMemoryBlueprintPersistence se implementó la lógica de almacenamiento y acceso a los datos mediante un HashMap<Tuple<String, String>, Blueprint>.
+
+![](img/persistencia.png)
+
+Tras completar la implementación de la lógica, se realizaron las pruebas unitarias correspondientes a InMemoryBlueprintPersistence, las cuales se ejecutaron satisfactoriamente, garantizando que el manejo de los planos fuera correcto.
+
+![](img/testPersisitencia.png)
+
+Se crearon los métodos necesarios en InMemoryBlueprintPersistence para registrar, consultar y eliminar planos, con la finalidad de gestionar los planos arquitectónicos a través de las clases superiores.
+
+![](img/service.png)
+
+Por último, se implementó la clase Main, que permitió poner en uso estos métodos de gestión de planos y comprobar su correcto funcionamiento dentro de la aplicación.
+
+![](img/main.png)
+
+![](img/mainPrueba.png)
+
+Para abordar las necesidades planteadas, se diseñaron e implementaron dos tipos de filtros que se integrarían a la clase `BlueprintServices`, de modo que pudieran aplicarse de manera intercambiable dependiendo de los requisitos de la consulta.
+
+![](img/blueprint-filter.png)
+
+1. **Filtro de Redundancias (A):**
+
+    Este filtro tiene como objetivo eliminar los puntos consecutivos que sean idénticos, ayudando a reducir el tamaño de los planos al eliminar redundancias. Se implementó una clase RedundancyFilter, que aplica esta lógica sobre una lista de puntos de un plano. La clase iterará sobre los puntos, eliminando aquellos que sean consecutivos y tengan las mismas coordenadas.
+
+    Se creó una clase `RedundancyFilter` que implementa una interfaz `BlueprintFilter`. Esta interfaz define un método `filter(List<Point> points)`, que debe ser implementado por todas las clases de filtro.
+
+    En el método filter, se recorren los puntos del plano y se agrega a la lista resultante solo aquellos puntos que no sean iguales al anterior.
+
+    Este filtro se inyectó en la clase BlueprintServices, de modo que, cuando se solicite la consulta de planos, se pueda aplicar dicho filtro para eliminar los puntos redundantes.
+
+    ![](img/redundancy-filter.png)
+
+2. **Filtro de Submuestreo (B)**
+
+    El filtro de submuestreo tiene como objetivo reducir el número de puntos en el plano, eliminando uno de cada dos puntos de forma intercalada. Este tipo de filtro puede ser útil en escenarios donde la precisión no es crítica y se busca mejorar el rendimiento al manejar grandes cantidades de datos.
+
+    Se desarrolló una clase `SubsamplingFilter`, que también implementa la interfaz `BlueprintFilter`. La lógica de este filtro consiste en seleccionar solo los puntos en las posiciones pares o impares de la lista, dependiendo de la implementación.
+
+    El método filter en este caso recorre la lista de puntos y agrega al resultado solo los puntos que se encuentren en índices impares o pares.
+
+    ![](img/subsampling-filter.png)
+
+3. **Inyección de los Filtros en la Clase `BlueprintServices`**
+
+   Para que los filtros se puedan aplicar de manera dinámica, fue necesario configurar la inyección de dependencias en la clase `AppConfig`. Se agregó un `@Bean` en esta clase para definir qué filtro será utilizado durante la ejecución de la aplicación.
+
+    ![app-config-bean.png](img/app-config-bean.png)
+
+   Además, se modificó la clase `BlueprintServices` para aceptar un filtro como parámetro en su constructor, utilizando la anotación `@Autowired` para que Spring gestione la inyección del filtro correspondiente.
+
+    ![](img/blueprint-service-filter.png)
+
+4. **Pruebas Unitarias**
+
+    En el contexto de las pruebas, fue necesario incluir `spring-test` en el archivo `pom.xml` para habilitar las pruebas unitarias y asegurar que la inyección de dependencias y el funcionamiento de los filtros se realizaran correctamente.
+
+    ![](img/spring-test-dependency.png)
+    
+    Se desarrollaron pruebas unitarias específicas para verificar que ambos filtros funcionaran correctamente. Cada filtro se probó individualmente para asegurar que se aplicara correctamente y redujera los puntos según el comportamiento esperado.
+    
+    ![](img/filter-test.png)
