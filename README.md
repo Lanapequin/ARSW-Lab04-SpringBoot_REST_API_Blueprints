@@ -1,3 +1,55 @@
+# Inversión de Dependencias, Contenedores Livianos e Inyección con Spring Framework
+
+## Integrantes
+- Laura Natalia Perilla Quintero - [Lanapequin](https://github.com/Lanapequin)
+- Santiago Botero Garcia - [LePeanutButter](https://github.com/LePeanutButter)
+
+## Taller – Principio de Inversión de dependencias, Contenedores Livianos e Inyección de dependencias.
+
+Antes de abordar el desarrollo del ejercicio Parte I. - Diseño de Componentes y Conectores con Inyección de Dependencias en Spring, se realizó este taller introductorio con el objetivo de familiarizarse con los conceptos fundamentales del uso de Spring Framework como contenedor liviano, la inyección de dependencias y la aplicación del principio de inversión de dependencias.
+
+Este taller se encuentra disponible en el folder `spring-lightweight-cont`, donde se puede consultar el código fuente, configuración y pruebas realizadas.
+
+Este taller documenta la configuración y prueba de una aplicación Java basada en Spring Framework, que realiza análisis gramatical utilizando correctores ortográficos inyectados dinámicamente. Se utilizó Maven como gestor de dependencias y el entorno IntelliJ IDEA para el desarrollo.
+
+El archivo applicationContext.xml ubicado en `src/main/resources` define el contexto de Spring. Se habilita el escaneo automático de componentes con la siguiente configuración:
+
+![bean-resources.png](img/bean-resources.png)
+
+Esto permite que Spring detecte clases anotadas con `@Service`, `@Component`, etc., dentro del paquete especificado. Así se evita la necesidad de declarar manualmente cada bean.
+
+La clase principal contiene el método main que inicializa el contexto de Spring y obtiene el bean GrammarChecker para ejecutar la verificación gramatical:
+
+![main-spring-lightweight.png](img/main-spring-lightweight.png)
+
+Este fragmento demuestra cómo Spring gestiona la creación e inyección de dependencias automáticamente.
+
+La clase GrammarChecker es el componente central que depende de una implementación de SpellChecker. Se anota con `@Service` para que Spring la registre como bean, y se usa `@Autowired` junto con `@Qualifier` para inyectar la implementación deseada:
+
+![grammar-checker-as-service.png](img/grammar-checker-as-service.png)
+
+sta clase implementa la interfaz SpellChecker y se anota con `@Service("englishSpellChecker")` para que Spring la identifique con ese nombre:
+
+![english-as-service.png](img/english-as-service.png)
+
+Esta implementación se inyecta inicialmente en GrammarChecker.
+
+Similar a la versión en inglés, esta clase implementa SpellChecker y se registra como bean con nombre específico:
+
+![spanish-as-service.png](img/spanish-as-service.png)
+
+Para usar esta implementación, se debe cambiar el `@Qualifier` en GrammarChecker a "spanishSpellChecker".
+
+La prueba inicial utiliza EnglishSpellChecker como dependencia inyectada. El resultado muestra cómo se analiza el texto usando reglas del idioma inglés.
+
+![english-test.png](img/english-test.png)
+
+Tras modificar el `@Qualifier` en GrammarChecker, se inyecta SpanishSpellChecker. El resultado refleja el análisis gramatical bajo reglas del idioma español.
+
+![spanish-test.png](img/spanish-test.png)
+
+## Parte I. - Diseño de Componentes y Conectores con Inyección de Dependencias en Spring
+
 En este ejercicio, se construyó un modelo de clases para la capa lógica de una aplicación destinada a gestionar planos arquitectónicos de una prestigiosa compañía de diseño.
 
 Se implementaron las anotaciones necesarias para integrar correctamente el framework Spring y garantizar su funcionamiento adecuado en el contexto de la gestión de planos.
