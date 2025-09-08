@@ -23,18 +23,20 @@ public class Main {
         ApplicationContext ctx = new AnnotationConfigApplicationContext(AppConfig.class);
         BlueprintsServices services = ctx.getBean(BlueprintsServices.class);
 
+        String firstAuthor = "Alice";
+
         try {
-            Blueprint bp1 = new Blueprint("Alice", "PlanA", new Point[]{new Point(10, 10), new Point(20, 20)});
-            Blueprint bp2 = new Blueprint("Alice", "PlanB", new Point[]{new Point(15, 15), new Point(25, 25)});
+            Blueprint bp1 = new Blueprint(firstAuthor, "PlanA", new Point[]{new Point(10, 10), new Point(20, 20)});
+            Blueprint bp2 = new Blueprint(firstAuthor, "PlanB", new Point[]{new Point(15, 15), new Point(25, 25)});
             Blueprint bp3 = new Blueprint("Bob", "PlanX", new Point[]{new Point(5, 5), new Point(8, 8)});
 
             services.addNewBlueprint(bp1);
             services.addNewBlueprint(bp2);
             services.addNewBlueprint(bp3);
 
-            logger.log(Level.INFO, "Blueprint Alice, PlanA: {0}", services.getBlueprint("Alice", "PlanA"));
+            logger.log(Level.INFO, "Blueprint Alice, PlanA: {0}", services.getBlueprint(firstAuthor, "PlanA"));
 
-            Set<Blueprint> aliceBlueprints = services.getBlueprintsByAuthor("Alice");
+            Set<Blueprint> aliceBlueprints = services.getBlueprintsByAuthor(firstAuthor);
             logger.info("Blueprints by Alice:");
             aliceBlueprints.forEach(bp -> logger.info(bp.toString()));
 
@@ -42,10 +44,10 @@ public class Main {
             logger.info("All blueprints in the system:");
             allBlueprints.forEach(bp -> logger.info(bp.toString()));
 
-            services.deleteBlueprint("Alice", "PlanB");
+            services.deleteBlueprint(firstAuthor, "PlanB");
 
             logger.info("Blueprints by Alice after deleting PlanB:");
-            aliceBlueprints = services.getBlueprintsByAuthor("Alice");
+            aliceBlueprints = services.getBlueprintsByAuthor(firstAuthor);
             aliceBlueprints.forEach(bp -> logger.info(bp.toString()));
 
         } catch (BlueprintNotFoundException e) {
